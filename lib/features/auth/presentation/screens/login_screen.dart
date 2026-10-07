@@ -1,6 +1,7 @@
 import 'package:fylax_front/app/router.dart';
 import 'package:fylax_front/app/theme/app_theme.dart';
 import 'package:fylax_front/core/widgets/fade_in_slide.dart';
+import 'package:fylax_front/core/widgets/fylax_logo.dart';
 import 'package:fylax_front/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,7 +47,7 @@ class LoginScreen extends ConsumerWidget {
                 const Spacer(flex: 2),
                 ...staggered(
                   [
-                    const _BrandMark(),
+                    const Center(child: FylaxLogo(size: 96)),
                     const SizedBox(height: 28),
                     Text(
                       'Fylax',
@@ -104,43 +105,6 @@ class LoginScreen extends ConsumerWidget {
                   initialDelay: const Duration(milliseconds: 420),
                 ),
               ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Marca: monograma "F" en pastilla con el degradado azul → verde.
-class _BrandMark extends StatelessWidget {
-  const _BrandMark();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 92,
-        height: 92,
-        decoration: BoxDecoration(
-          gradient: AppColors.brandGradient,
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.blue.withValues(alpha: 0.4),
-              blurRadius: 32,
-              offset: const Offset(0, 10),
-            ),
-          ],
-        ),
-        child: const Center(
-          child: Text(
-            'F',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 46,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1,
             ),
           ),
         ),

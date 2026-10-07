@@ -1,8 +1,10 @@
+import 'package:fylax_front/core/demo/demo_goals_repository.dart';
 import 'package:fylax_front/core/demo/demo_repositories.dart';
 import 'package:fylax_front/core/network/api_client.dart';
 import 'package:fylax_front/features/auth/domain/repositories/auth_repository.dart';
 import 'package:fylax_front/features/categories/domain/repositories/categories_repository.dart';
 import 'package:fylax_front/features/dashboard/domain/repositories/dashboard_repository.dart';
+import 'package:fylax_front/features/goals/domain/repositories/goals_repository.dart';
 import 'package:fylax_front/features/sync/domain/repositories/sync_repository.dart';
 import 'package:fylax_front/features/transactions/domain/repositories/transactions_repository.dart';
 import 'package:get_it/get_it.dart';
@@ -39,4 +41,5 @@ Future<void> configureDependencies() async {
     () => DemoDashboardRepository(sl<DemoTransactionsRepository>()),
   );
   sl.registerLazySingleton<SyncRepository>(DemoSyncRepository.new);
+  sl.registerLazySingleton<GoalsRepository>(DemoGoalsRepository.new);
 }

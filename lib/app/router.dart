@@ -1,7 +1,11 @@
 import 'package:fylax_front/app/theme/app_theme.dart';
 import 'package:fylax_front/features/auth/presentation/screens/login_screen.dart';
 import 'package:fylax_front/features/dashboard/presentation/screens/dashboard_screen.dart';
+import 'package:fylax_front/features/goals/presentation/screens/goal_form_screen.dart';
+import 'package:fylax_front/features/goals/presentation/screens/goals_screen.dart';
 import 'package:fylax_front/features/onboarding/presentation/screens/onboarding_screen.dart';
+import 'package:fylax_front/features/profile/presentation/screens/profile_screen.dart';
+import 'package:fylax_front/features/settings/presentation/screens/settings_screen.dart';
 import 'package:fylax_front/features/transactions/domain/entities/transaction.dart';
 import 'package:fylax_front/features/transactions/presentation/screens/transaction_form_screen.dart';
 import 'package:fylax_front/features/transactions/presentation/screens/transactions_feed_screen.dart';
@@ -10,14 +14,19 @@ import 'package:go_router/go_router.dart';
 
 /// Rutas de la aplicación.
 ///
-/// Flujo: /login → /onboarding → shell principal (Inicio / Movimientos)
-/// con el formulario de gasto manual como página modal encima.
+/// Flujo: /login → /onboarding → shell principal (Inicio / Movimientos /
+/// Propósitos / Perfil) con el formulario de gasto manual como página
+/// modal encima. Configuración cuelga del perfil.
 abstract final class AppRouter {
   static const login = '/login';
   static const onboarding = '/onboarding';
   static const dashboard = '/dashboard';
   static const transactionsFeed = '/transactions';
   static const transactionForm = '/transactions/form';
+  static const goals = '/goals';
+  static const goalForm = '/goals/form';
+  static const profile = '/profile';
+  static const settings = '/settings';
 
   static final config = GoRouter(
     initialLocation: login,
@@ -46,6 +55,22 @@ abstract final class AppRouter {
               ),
             ],
           ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: goals,
+                builder: (context, state) => const GoalsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: profile,
+                builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
+          ),
         ],
       ),
       GoRoute(
@@ -56,6 +81,17 @@ abstract final class AppRouter {
             existing: state.extra as Transaction?,
           ),
         ),
+      ),
+      GoRoute(
+        path: goalForm,
+        pageBuilder: (context, state) => const MaterialPage(
+          fullscreenDialog: true,
+          child: GoalFormScreen(),
+        ),
+      ),
+      GoRoute(
+        path: settings,
+        builder: (context, state) => const SettingsScreen(),
       ),
     ],
   );
@@ -117,13 +153,29 @@ class _FylaxNavBar extends StatelessWidget {
                   onTap: () => onTap(0),
                 ),
               ),
-              const SizedBox(width: 72), // hueco del FAB central
               Expanded(
                 child: _NavItem(
                   icon: Icons.receipt_long_rounded,
                   label: 'Movimientos',
                   selected: currentIndex == 1,
                   onTap: () => onTap(1),
+                ),
+              ),
+              const SizedBox(width: 72), // hueco del FAB central
+              Expanded(
+                child: _NavItem(
+                  icon: Icons.savings_rounded,
+                  label: 'Propósitos',
+                  selected: currentIndex == 2,
+                  onTap: () => onTap(2),
+                ),
+              ),
+              Expanded(
+                child: _NavItem(
+                  icon: Icons.person_rounded,
+                  label: 'Perfil',
+                  selected: currentIndex == 3,
+                  onTap: () => onTap(3),
                 ),
               ),
             ],
