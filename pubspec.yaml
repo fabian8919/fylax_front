@@ -1,0 +1,52 @@
+name: fylax_front
+description: >-
+  Fylax — App móvil de salud financiera automática (MVP).
+  Captura 100% automática de gastos desde Gmail + IA, dashboard minimalista.
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Estado y arquitectura
+  flutter_riverpod: ^2.5.1
+  get_it: ^7.7.0
+
+  # Red
+  dio: ^5.5.0
+
+  # Navegación
+  go_router: ^14.2.0
+
+  # Autenticación (Supabase Auth con proveedor Google OAuth)
+  supabase_flutter: ^2.5.6
+
+  # Caché local / modo offline
+  isar: ^3.1.0
+  isar_flutter_libs: ^3.1.0
+  connectivity_plus: ^6.0.3
+  shared_preferences: ^2.2.3
+
+  # Utilidades
+  intl: ^0.19.0
+  equatable: ^2.0.5
+  dartz: ^0.10.1
+  flutter_svg: ^2.0.10
+
+  # Monitoreo de errores (Sentry) — ver PRD sección 4
+  sentry_flutter: ^8.3.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  mocktail: ^1.0.4
+  build_runner: ^2.4.11
+  isar_generator: ^3.1.0
+
+flutter:
+  uses-material-design: true
