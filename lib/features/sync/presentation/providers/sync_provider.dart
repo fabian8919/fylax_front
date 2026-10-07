@@ -1,10 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fylax_front/app/di/injection.dart';
 import 'package:fylax_front/features/sync/domain/entities/sync_status.dart';
 import 'package:fylax_front/features/sync/domain/repositories/sync_repository.dart';
 import 'package:fylax_front/features/sync/domain/usecases/get_sync_status.dart';
 
 final syncRepositoryProvider = Provider<SyncRepository>(
-  (ref) => throw UnimplementedError('Registrar SyncRepository en DI'),
+  (ref) => sl<SyncRepository>(),
 );
 
 final getSyncStatusProvider = Provider(

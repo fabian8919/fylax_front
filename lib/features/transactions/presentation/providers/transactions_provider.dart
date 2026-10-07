@@ -1,9 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fylax_front/app/di/injection.dart';
 import 'package:fylax_front/features/transactions/domain/entities/transaction.dart';
 import 'package:fylax_front/features/transactions/domain/repositories/transactions_repository.dart';
 
 final transactionsRepositoryProvider = Provider<TransactionsRepository>(
-  (ref) => throw UnimplementedError('Registrar TransactionsRepository en DI'),
+  (ref) => sl<TransactionsRepository>(),
 );
 
 /// F3.2 — feed paginado con scroll infinito y pull-to-refresh.

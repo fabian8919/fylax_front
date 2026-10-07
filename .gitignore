@@ -78,3 +78,7 @@ build/
 .env
 .env.*
 !.env.example
+
+# Logs de Kotlin/Gradle
+.android/.kotlin/
+android/.kotlin/

@@ -1,12 +1,11 @@
-import 'package:dartz/dartz.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fylax_front/core/errors/failure.dart';
+import 'package:fylax_front/app/di/injection.dart';
 import 'package:fylax_front/features/dashboard/domain/entities/dashboard_summary.dart';
 import 'package:fylax_front/features/dashboard/domain/repositories/dashboard_repository.dart';
 import 'package:fylax_front/features/dashboard/domain/usecases/get_dashboard_summary.dart';
 
 final dashboardRepositoryProvider = Provider<DashboardRepository>(
-  (ref) => throw UnimplementedError('Registrar DashboardRepository en DI'),
+  (ref) => sl<DashboardRepository>(),
 );
 
 final getDashboardSummaryProvider = Provider(

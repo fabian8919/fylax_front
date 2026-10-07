@@ -1,9 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fylax_front/app/di/injection.dart';
 import 'package:fylax_front/features/categories/domain/entities/category.dart';
 import 'package:fylax_front/features/categories/domain/repositories/categories_repository.dart';
 
 final categoriesRepositoryProvider = Provider<CategoriesRepository>(
-  (ref) => throw UnimplementedError('Registrar CategoriesRepository en DI'),
+  (ref) => sl<CategoriesRepository>(),
 );
 
 /// Categorías del sistema + personalizadas (GET /categories).

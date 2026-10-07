@@ -32,8 +32,7 @@ class AuthError extends AuthState {
 }
 
 final authRepositoryProvider = Provider<AuthRepository>(
-  // TODO(Fase 2): registrar AuthRepositoryImpl(sl()) en injection.dart.
-  (ref) => throw UnimplementedError('Registrar AuthRepository en DI'),
+  (ref) => sl<AuthRepository>(),
 );
 
 final signInWithGoogleProvider = Provider(

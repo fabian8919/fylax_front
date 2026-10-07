@@ -1,4 +1,6 @@
 import 'package:fylax_front/app/router.dart';
+import 'package:fylax_front/app/theme/app_theme.dart';
+import 'package:fylax_front/core/widgets/fade_in_slide.dart';
 import 'package:fylax_front/features/auth/presentation/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,19 +8,19 @@ import 'package:go_router/go_router.dart';
 
 /// Pantalla de login (F1.1): "Sign in with Google" sin contraseña.
 ///
-/// Si el consent screen no otorga el scope gmail.readonly (F1.2), se
-/// muestra un mensaje explicativo de por qué Fylax necesita leer el correo.
+/// Dark-first: lienzo negro, marca con degradado azul → verde y entrada
+/// escalonada de cada bloque. Si el consent screen no otorga el scope
+/// gmail.readonly (F1.2), se muestra un mensaje explicativo.
 class LoginScreen extends ConsumerWidget {
   const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authNotifierProvider);
+    final loading = authState is AuthLoading;
 
     ref.listen(authNotifierProvider, (prev, next) {
-      if (next is AuthAuthenticated) {
-        context.go(AppRouter.onboarding);
-      }
+      if (next is AuthAuthenticated) context.go(AppRouter.onboarding);
       if (next is AuthError) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(next.message)),
@@ -27,45 +29,162 @@ class LoginScreen extends ConsumerWidget {
     });
 
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Spacer(),
-              Text(
-                'Fylax',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.displaySmall,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Tus gastos se registran solos.\nTú solo miras el panorama.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              const Spacer(),
-              FilledButton.icon(
-                onPressed: authState is AuthLoading
-                    ? null
-                    : () => ref
-                        .read(authNotifierProvider.notifier)
-                        .signInWithGoogle(),
-                icon: const Icon(Icons.login),
-                label: const Text('Continuar con Google'),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Solicitamos acceso de solo lectura a tu correo (gmail.readonly) '
-                'para detectar automáticamente tus compras y pagos. '
-                'Nunca leemos nada que no sea un recibo.',
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: RadialGradient(
+            center: Alignment(0, -0.9),
+            radius: 1.4,
+            colors: [Color(0xFF10263F), AppColors.background],
           ),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 28),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Spacer(flex: 2),
+                ...staggered(
+                  [
+                    const _BrandMark(),
+                    const SizedBox(height: 28),
+                    Text(
+                      'Fylax',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.displayMedium,
+                    ),
+                    const SizedBox(height: 14),
+                    Text(
+                      'Tus gastos se registran solos.\nTú solo miras el panorama.',
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            fontSize: 17,
+                          ),
+                    ),
+                  ],
+                  step: const Duration(milliseconds: 140),
+                ),
+                const Spacer(flex: 3),
+                ...staggered(
+                  [
+                    _GoogleButton(
+                      loading: loading,
+                      onPressed: loading
+                          ? null
+                          : () => ref
+                              .read(authNotifierProvider.notifier)
+                              .signInWithGoogle(),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.lock_outline_rounded,
+                          size: 14,
+                          color: AppColors.textMuted,
+                        ),
+                        const SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            'Solo lectura de tu correo (gmail.readonly). '
+                            'Nunca enviamos ni borramos nada.',
+                            textAlign: TextAlign.center,
+                            style:
+                                Theme.of(context).textTheme.bodySmall?.copyWith(
+                                      color: AppColors.textMuted,
+                                    ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                  step: const Duration(milliseconds: 140),
+                  initialDelay: const Duration(milliseconds: 420),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Marca: monograma "F" en pastilla con el degradado azul → verde.
+class _BrandMark extends StatelessWidget {
+  const _BrandMark();
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        width: 92,
+        height: 92,
+        decoration: BoxDecoration(
+          gradient: AppColors.brandGradient,
+          borderRadius: BorderRadius.circular(28),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.blue.withValues(alpha: 0.4),
+              blurRadius: 32,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: const Center(
+          child: Text(
+            'F',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 46,
+              fontWeight: FontWeight.w800,
+              letterSpacing: -1,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _GoogleButton extends StatelessWidget {
+  const _GoogleButton({required this.loading, required this.onPressed});
+
+  final bool loading;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedOpacity(
+      opacity: loading ? 0.75 : 1,
+      duration: const Duration(milliseconds: 200),
+      child: SizedBox(
+        height: 56,
+        child: FilledButton(
+          onPressed: onPressed,
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.textPrimary,
+            foregroundColor: AppColors.background,
+          ),
+          child: loading
+              ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.4,
+                    color: AppColors.background,
+                  ),
+                )
+              : const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.g_mobiledata_rounded, size: 30),
+                    SizedBox(width: 4),
+                    Text('Continuar con Google'),
+                  ],
+                ),
         ),
       ),
     );

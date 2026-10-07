@@ -68,6 +68,6 @@ class TransactionsRemoteDataSourceImpl
 
   @override
   Future<void> deleteTransaction(String id) async {
-    await _client.delete('/transactions/$id');
+    await _client.delete<void>('/transactions/$id');
   }
 }

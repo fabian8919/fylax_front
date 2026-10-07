@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:fylax_front/core/errors/failure.dart';
 import 'package:fylax_front/features/transactions/data/datasources/transactions_remote_datasource.dart';
+import 'package:fylax_front/features/transactions/data/models/transaction_model.dart';
 import 'package:fylax_front/features/transactions/domain/entities/transaction.dart';
 import 'package:fylax_front/features/transactions/domain/repositories/transactions_repository.dart';
 
@@ -41,11 +42,11 @@ class TransactionsRepositoryImpl implements TransactionsRepository {
 
   @override
   Future<Either<Failure, Transaction>> createTransaction(Transaction tx) =>
-      _mutate(() => _remote.createTransaction, tx);
+      _mutate(() => _remote.createTransaction(_toModel(tx)));
 
   @override
   Future<Either<Failure, Transaction>> updateTransaction(Transaction tx) =>
-      _mutate(() => _remote.updateTransaction, tx);
+      _mutate(() => _remote.updateTransaction(_toModel(tx)));
 
   @override
   Future<Either<Failure, Unit>> deleteTransaction(String id) async {
@@ -59,8 +60,7 @@ class TransactionsRepositoryImpl implements TransactionsRepository {
   }
 
   Future<Either<Failure, Transaction>> _mutate(
-    Future<dynamic> Function() op,
-    Transaction tx,
+    Future<TransactionModel> Function() op,
   ) async {
     try {
       final model = await op();
@@ -75,4 +75,16 @@ class TransactionsRepositoryImpl implements TransactionsRepository {
       return Left(ServerFailure('Error $status'));
     }
   }
+
+  static TransactionModel _toModel(Transaction tx) => TransactionModel(
+        id: tx.id,
+        userId: tx.userId,
+        categoryId: tx.categoryId,
+        amount: tx.amount,
+        currency: tx.currency,
+        date: tx.date,
+        merchantClean: tx.merchantClean,
+        source: tx.source,
+        sourceRefId: tx.sourceRefId,
+      );
 }

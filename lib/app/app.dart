@@ -13,9 +13,10 @@ class FylaxApp extends StatelessWidget {
       child: MaterialApp.router(
         title: 'Fylax',
         debugShowCheckedModeBanner: false,
-        theme: AppTheme.light,
+        theme: AppTheme.dark,
         darkTheme: AppTheme.dark,
-        themeMode: ThemeMode.system,
+        // Fylax es dark-first: paleta negro/azul/verde (PRD §4).
+        themeMode: ThemeMode.dark,
         routerConfig: AppRouter.config,
       ),
     );
