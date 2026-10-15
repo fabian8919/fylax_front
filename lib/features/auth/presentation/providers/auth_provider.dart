@@ -18,8 +18,11 @@ class AuthLoading extends AuthState {
 }
 
 class AuthAuthenticated extends AuthState {
-  const AuthAuthenticated(this.user);
+  /// [isNewSignIn] distingue un login recién hecho (→ onboarding) de una
+  /// sesión restaurada al abrir la app (→ directo al dashboard).
+  const AuthAuthenticated(this.user, {this.isNewSignIn = false});
   final User user;
+  final bool isNewSignIn;
 }
 
 class AuthUnauthenticated extends AuthState {
@@ -44,9 +47,23 @@ final authNotifierProvider = StateNotifierProvider<AuthNotifier, AuthState>(
 );
 
 class AuthNotifier extends StateNotifier<AuthState> {
-  AuthNotifier(this._ref) : super(const AuthInitial());
+  AuthNotifier(this._ref) : super(const AuthInitial()) {
+    _restoreSession();
+  }
 
   final Ref _ref;
+
+  /// Sesión persistente (F1.1): si Supabase guardó una sesión vigente,
+  /// arranca autenticado sin pasar por el login.
+  Future<void> _restoreSession() async {
+    final result = await _ref.read(authRepositoryProvider).getCurrentUser();
+    result.fold(
+      (_) => state = const AuthUnauthenticated(),
+      (user) => state = user == null
+          ? const AuthUnauthenticated()
+          : AuthAuthenticated(user),
+    );
+  }
 
   /// F1.1 — Sign in with Google. El scope gmail.readonly se valida en
   /// el repositorio; si falta, se expone AuthError con mensaje explicativo.
@@ -55,7 +72,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final result = await _ref.read(signInWithGoogleProvider).call();
     result.fold(
       (failure) => state = AuthError(failure.message),
-      (user) => state = AuthAuthenticated(user),
+      (user) => state = AuthAuthenticated(user, isNewSignIn: true),
     );
   }
 

@@ -1,15 +1,26 @@
+import 'dart:async';
+
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:fylax_front/core/errors/failure.dart';
 import 'package:fylax_front/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:fylax_front/features/auth/domain/entities/user.dart';
 import 'package:fylax_front/features/auth/domain/repositories/auth_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide User;
 
 /// Implementación del repositorio de auth (PRD §5.1 — patrón Repository).
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this._remote);
 
   final AuthRemoteDataSource _remote;
+
+  SupabaseClient? get _supabase {
+    try {
+      return Supabase.instance.client;
+    } catch (_) {
+      return null;
+    }
+  }
 
   @override
   Future<Either<Failure, User>> signInWithGoogle() async {
@@ -18,6 +29,10 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(model.toEntity());
     } on DioException catch (e) {
       return Left(_mapError(e));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message));
+    } on TimeoutException {
+      return const Left(AuthFailure('El inicio de sesión tardó demasiado'));
     } catch (_) {
       return const Left(AuthFailure());
     }
@@ -45,15 +60,30 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, User?>> getCurrentUser() async {
-    // TODO(Fase 2): leer la sesión persistida de Supabase y mapear a User.
-    return const Right(null);
+    // Sesión persistida por supabase_flutter (SharedPreferences/Keystore):
+    // si hay sesión vigente, se mapea a la entidad de dominio.
+    final session = _supabase?.auth.currentSession;
+    if (session == null) return const Right(null);
+
+    final u = session.user;
+    final metadata = u.userMetadata ?? const <String, dynamic>{};
+    return Right(
+      User(
+        id: u.id,
+        email: u.email ?? '',
+        name: (metadata['full_name'] ?? metadata['name'] ?? '') as String,
+        subscriptionTier: 'free',
+        avatarUrl: metadata['avatar_url'] as String?,
+      ),
+    );
   }
 
   @override
   Future<bool> hasGmailReadonlyScope() async {
-    // TODO(Fase 2): verificar el scope del provider_token devuelto por
-    // Supabase Auth (PRD §F1.2).
-    return false;
+    // Supabase no expone los scopes concedidos; el providerToken (access
+    // token de Google) solo existe si el consent screen fue aceptado con
+    // los scopes solicitados (gmail.readonly — PRD §F1.2).
+    return _supabase?.auth.currentSession?.providerToken != null;
   }
 
   Failure _mapError(DioException e) {

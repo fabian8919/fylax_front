@@ -36,26 +36,32 @@ depende de una externa:
 lib/
 ├── main.dart                # bootstrap: DI, Supabase, Sentry
 ├── app/                     # MaterialApp, router, tema, DI (get_it)
-├── core/                    # constantes, errores, ApiClient, caché, utils
+├── core/                    # constantes, errores, ApiClient (JWT), caché, utils
 └── features/
-    ├── auth/                # Épica 1: login Google + sesión
+    ├── auth/                # Épica 1: login Google + sesión persistente
     ├── onboarding/          # Épica 1: 3 pantallas (valor, permiso, sync)
     ├── dashboard/           # Épica 3: balance, presupuesto, categorías
     ├── transactions/        # Épica 3: feed, formulario manual
+    ├── goals/               # propósitos de ahorro (CRUD + aportes)
     ├── sync/                # Épica 3: indicador de sincronización (F3.4)
     └── categories/          # categorías del sistema y personalizadas
 ```
 
 ## Estado del proyecto
 
-Estructura base generada desde el PRD v2.0 (23-sep-2026). Los archivos
-marcan con `TODO(Fase N)` los puntos de implementación según el plan de
-fases del PRD §12:
+Fase 5 **implementada** (14-oct-2026): la app corre en dos modos según la
+configuración (`AppConstants.isBackendConfigured`):
 
-1. **Fase 5 (app Flutter)**: registrar repositorios en `lib/app/di/injection.dart`,
-   completar el flujo OAuth de Supabase y el interceptor de JWT en
-   `core/network/api_client.dart`.
-2. **Fase 6**: tests, Sentry y CI/CD.
+- **Backend real** (con `SUPABASE_ANON_KEY`): OAuth de Google vía Supabase
+  Auth (scope `gmail.readonly`, `access_type=offline` para el refresh
+  token), `POST /auth/session`, interceptor que adjunta el JWT en cada
+  petición y lo refresca una vez ante 401, sesión persistente al reabrir
+  la app y repositorios remotos para categorías, transacciones, dashboard,
+  propósitos y sync.
+- **Demo** (sin anon-key): repositorios en memoria, app navegable de punta
+  a punta sin backend.
+
+Pendiente — Fase 6: tests, Sentry y CI/CD.
 
 ## Puesta en marcha
 
@@ -63,8 +69,24 @@ fases del PRD §12:
 # Requiere Flutter >= 3.22 (Dart >= 3.4)
 flutter create . --project-name fylax_front   # genera carpetas de plataforma
 flutter pub get
-flutter run --dart-define=API_BASE_URL=... --dart-define=SUPABASE_URL=...
+
+# Modo backend real (emulador Android → backend local en tu PC):
+flutter run --dart-define=SUPABASE_ANON_KEY=<anon-key-del-proyecto>
+# API_BASE_URL ya apunta a http://10.0.2.2:8000/api/v1 por defecto
+# (10.0.2.2 = localhost del PC visto desde el emulador).
+
+# Dispositivo físico en la misma red Wi-Fi:
+flutter run --dart-define=SUPABASE_ANON_KEY=... \
+  --dart-define=API_BASE_URL=http://<ip-de-tu-pc>:8000/api/v1
+
+# Modo demo (sin backend):
+flutter run
 ```
+
+La anon-key está en Supabase → **Project Settings → API → anon public key**
+(es pública por diseño; la seguridad real la dan RLS + el JWT).
+Prerequisito: el backend corriendo (`uvicorn app.main:app --reload` en
+`fylax_back`) con el `.env` configurado.
 
 ## Reglas de diseño clave (del PRD)
 
