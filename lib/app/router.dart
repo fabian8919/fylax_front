@@ -30,6 +30,14 @@ abstract final class AppRouter {
 
   static final config = GoRouter(
     initialLocation: login,
+    redirect: (context, state) {
+      // Deep link del OAuth de Google (io.supabase.flutter://login-callback?code=…).
+      // La sesión la procesa Supabase internamente (onAuthStateChange);
+      // no es una ruta de la app: se redirige al login, que reacciona al
+      // cambio de estado de autenticación y navega a onboarding/dashboard.
+      if (state.uri.host == 'login-callback') return login;
+      return null;
+    },
     routes: [
       GoRoute(path: login, builder: (context, state) => const LoginScreen()),
       GoRoute(

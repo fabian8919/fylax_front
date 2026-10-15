@@ -263,8 +263,9 @@ class _RecentTransactions extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncTx = ref.watch(transactionsProvider);
-    final items = asyncTx.valueOrNull ?? const [];
-    if (items.isEmpty) {
+    // Mientras no hay valor: spinner. Con valor y lista vacía: empty state
+    // (antes una lista vacía real quedaba girando para siempre).
+    if (!asyncTx.hasValue) {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 24),
         child: Center(
@@ -275,6 +276,20 @@ class _RecentTransactions extends ConsumerWidget {
               strokeWidth: 2,
               color: AppColors.green,
             ),
+          ),
+        ),
+      );
+    }
+    final items = asyncTx.valueOrNull ?? const [];
+    if (items.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Center(
+          child: Text(
+            'Sin movimientos todavía',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
           ),
         ),
       );

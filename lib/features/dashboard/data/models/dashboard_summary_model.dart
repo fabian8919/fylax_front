@@ -1,3 +1,4 @@
+import 'package:fylax_front/core/utils/parse_amount.dart';
 import 'package:fylax_front/features/dashboard/domain/entities/dashboard_summary.dart';
 
 /// DTO de GET /dashboard/summary.
@@ -10,8 +11,8 @@ class DashboardSummaryModel {
 
   factory DashboardSummaryModel.fromJson(Map<String, dynamic> json) =>
       DashboardSummaryModel(
-        monthBalance: (json['month_balance'] as num).toDouble(),
-        availableBudget: (json['available_budget'] as num).toDouble(),
+        monthBalance: parseApiAmount(json['month_balance']),
+        availableBudget: parseApiAmount(json['available_budget']),
         spendingByCategory: (json['spending_by_category'] as List<dynamic>? ??
                 const [])
             .map(
@@ -46,7 +47,7 @@ class CategorySpendingModel {
       CategorySpendingModel(
         categoryId: json['category_id'] as String,
         categoryName: json['category_name'] as String,
-        amount: (json['amount'] as num).toDouble(),
+        amount: parseApiAmount(json['amount']),
         icon: json['icon'] as String? ?? 'category',
         color: json['color'] as String? ?? '#888888',
       );

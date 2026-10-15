@@ -1,3 +1,4 @@
+import 'package:fylax_front/core/utils/parse_amount.dart';
 import 'package:fylax_front/features/transactions/domain/entities/transaction.dart';
 
 /// DTO de transacción (PRD §8 — snake_case del API).
@@ -24,7 +25,7 @@ class TransactionModel {
         source: json['source'] == 'manual'
             ? TransactionSource.manual
             : TransactionSource.gmailApi,
-        amount: (json['amount'] as num).toDouble(),
+        amount: parseApiAmount(json['amount']),
         currency: json['currency'] as String? ?? 'COP',
         sourceRefId: json['source_ref_id'] as String?,
       );

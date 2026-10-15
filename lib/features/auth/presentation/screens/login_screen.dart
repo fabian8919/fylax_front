@@ -20,6 +20,18 @@ class LoginScreen extends ConsumerWidget {
     final authState = ref.watch(authNotifierProvider);
     final loading = authState is AuthLoading;
 
+    // Guard de carrera: si el deep link reconstruyó esta pantalla DESPUÉS
+    // de que el estado ya quedó autenticado, navega igualmente.
+    if (authState is AuthAuthenticated) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) {
+          context.go(
+            authState.isNewSignIn ? AppRouter.onboarding : AppRouter.dashboard,
+          );
+        }
+      });
+    }
+
     ref.listen(authNotifierProvider, (prev, next) {
       if (next is AuthAuthenticated) {
         // Login recién hecho → onboarding; sesión restaurada → directo

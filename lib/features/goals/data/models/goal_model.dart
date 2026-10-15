@@ -1,3 +1,4 @@
+import 'package:fylax_front/core/utils/parse_amount.dart';
 import 'package:fylax_front/features/goals/domain/entities/goal.dart';
 
 /// DTO de propósito de ahorro (snake_case del API — POST/GET /goals).
@@ -18,8 +19,8 @@ class GoalModel {
         id: json['id'] as String,
         userId: json['user_id'] as String,
         name: json['name'] as String,
-        targetAmount: (json['target_amount'] as num).toDouble(),
-        savedAmount: (json['saved_amount'] as num? ?? 0).toDouble(),
+        targetAmount: parseApiAmount(json['target_amount']),
+        savedAmount: parseApiAmount(json['saved_amount']),
         icon: json['icon'] as String? ?? 'savings',
         color: json['color'] as String? ?? '#2E8FFF',
         deadline: json['deadline'] == null
