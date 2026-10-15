@@ -1,27 +1,26 @@
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+
 /// Constantes globales de la app.
 ///
-/// Las URLs y llaves públicas (anon-key de Supabase) se inyectan por
-/// entorno con --dart-define (dev/staging/prod — PRD §12 Fase 1).
+/// Las URLs y llaves públicas (anon-key de Supabase) se leen del archivo
+/// `.env` (cargado en main.dart con flutter_dotenv; ver .env.example).
 /// La anon-key de Supabase es pública por diseño (la seguridad real la
 /// dan RLS + JWT); los secretos jamás viven en el cliente.
 abstract final class AppConstants {
   static const appName = 'Fylax';
 
-  // Base URL del backend FastAPI. Por defecto: emulador Android → el
-  // host (10.0.2.2 es el alias del localhost de tu PC desde el emulador).
-  // Para dispositivo físico: --dart-define=API_BASE_URL=http://<ip-pc>:8000/api/v1
-  static const apiBaseUrl = String.fromEnvironment(
-    'API_BASE_URL',
-    defaultValue: 'http://10.0.2.2:8000/api/v1',
-  );
+  // Base URL del backend FastAPI. 10.0.2.2 = localhost de tu PC desde el
+  // emulador Android; en dispositivo físico usa la IP local de tu PC.
+  static String get apiBaseUrl => dotenv.maybeGet('API_BASE_URL') ?? '';
 
-  // Proyecto Supabase (dev). La anon-key se pasa por --dart-define:
-  // --dart-define=SUPABASE_ANON_KEY=eyJ...
-  static const supabaseUrl = String.fromEnvironment(
-    'SUPABASE_URL',
-    defaultValue: 'https://qskentkrweagvpljqmmn.supabase.co',
-  );
-  static const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+  // Proyecto Supabase definitivo (Auth + PostgreSQL — PRD §4).
+  static String get supabaseUrl => dotenv.maybeGet('SUPABASE_URL') ?? '';
+
+  static String get supabaseAnonKey =>
+      dotenv.maybeGet('SUPABASE_ANON_KEY') ?? '';
+
+  /// DSN de Sentry (Fase 6 — monitoreo, PRD §4). Vacío = deshabilitado.
+  static String get sentryDsn => dotenv.maybeGet('SENTRY_DSN') ?? '';
 
   /// true cuando hay backend + Supabase configurados → DI registra las
   /// implementaciones reales; si no, la app corre en modo demo.
