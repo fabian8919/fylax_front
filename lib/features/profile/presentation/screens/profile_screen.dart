@@ -33,6 +33,15 @@ class ProfileScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 24),
             _MenuItem(
+              icon: Icons.payments_rounded,
+              title: 'Ingresos y presupuesto',
+              subtitle: user?.hasFinancialSetup ?? false
+                  ? '${user!.incomeFrequency == 'biweekly' ? 'Quincenal' : 'Mensual'} · actualiza tus planes'
+                  : 'Configura tu ingreso mensual o quincenal',
+              color: AppColors.green,
+              onTap: () => context.push(AppRouter.financialSetup),
+            ),
+            _MenuItem(
               icon: Icons.savings_rounded,
               title: 'Mis propósitos',
               subtitle: 'Metas de ahorro y avances',
@@ -259,19 +268,17 @@ class _MenuItem extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style:
-                            Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                  color: AppColors.textPrimary,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w600,
+                            ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         subtitle,
-                        style:
-                            Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.textMuted,
-                                ),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: AppColors.textMuted,
+                            ),
                       ),
                     ],
                   ),

@@ -59,9 +59,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
     final result = await _ref.read(authRepositoryProvider).getCurrentUser();
     result.fold(
       (_) => state = const AuthUnauthenticated(),
-      (user) => state = user == null
-          ? const AuthUnauthenticated()
-          : AuthAuthenticated(user),
+      (user) => state =
+          user == null ? const AuthUnauthenticated() : AuthAuthenticated(user),
     );
   }
 
@@ -73,6 +72,26 @@ class AuthNotifier extends StateNotifier<AuthState> {
     result.fold(
       (failure) => state = AuthError(failure.message),
       (user) => state = AuthAuthenticated(user, isNewSignIn: true),
+    );
+  }
+
+  Future<String?> updateFinancialProfile({
+    required double incomeAmount,
+    required String incomeFrequency,
+    required double monthlyBudget,
+  }) async {
+    final result =
+        await _ref.read(authRepositoryProvider).updateFinancialProfile(
+              incomeAmount: incomeAmount,
+              incomeFrequency: incomeFrequency,
+              monthlyBudget: monthlyBudget,
+            );
+    return result.fold(
+      (failure) => failure.message,
+      (user) {
+        state = AuthAuthenticated(user);
+        return null;
+      },
     );
   }
 

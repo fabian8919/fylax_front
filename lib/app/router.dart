@@ -5,6 +5,7 @@ import 'package:fylax_front/features/goals/presentation/screens/goal_form_screen
 import 'package:fylax_front/features/goals/presentation/screens/goals_screen.dart';
 import 'package:fylax_front/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:fylax_front/features/profile/presentation/screens/profile_screen.dart';
+import 'package:fylax_front/features/settings/presentation/screens/financial_setup_screen.dart';
 import 'package:fylax_front/features/settings/presentation/screens/settings_screen.dart';
 import 'package:fylax_front/features/transactions/domain/entities/transaction.dart';
 import 'package:fylax_front/features/transactions/presentation/screens/transaction_form_screen.dart';
@@ -27,6 +28,7 @@ abstract final class AppRouter {
   static const goalForm = '/goals/form';
   static const profile = '/profile';
   static const settings = '/settings';
+  static const financialSetup = '/financial-setup';
 
   static final config = GoRouter(
     initialLocation: login,
@@ -100,6 +102,12 @@ abstract final class AppRouter {
       GoRoute(
         path: settings,
         builder: (context, state) => const SettingsScreen(),
+      ),
+      GoRoute(
+        path: financialSetup,
+        builder: (context, state) => FinancialSetupScreen(
+          initialSetup: state.extra as bool? ?? false,
+        ),
       ),
     ],
   );

@@ -97,8 +97,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   width: double.infinity,
                   child: isLast
                       ? _GradientButton(
-                          label: 'Empezar',
-                          onPressed: () => context.go(AppRouter.dashboard),
+                          label: 'Configurar mis ingresos',
+                          onPressed: () => context.go(
+                            AppRouter.financialSetup,
+                            extra: true,
+                          ),
                         )
                       : FilledButton(
                           onPressed: () => _controller.nextPage(

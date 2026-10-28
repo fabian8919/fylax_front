@@ -5,6 +5,56 @@ import 'package:equatable/equatable.dart';
 ///
 /// Da contexto emocional al ahorro y será la base de las notificaciones
 /// accionables de avance de objetivos (PRD §7 — fase posterior al MVP).
+class GoalActionPlan extends Equatable {
+  const GoalActionPlan({
+    required this.incomeFrequency,
+    required this.recommendedContribution,
+    required this.monthlyContribution,
+    required this.feasible,
+    required this.requiresIncomeSetup,
+    required this.message,
+    this.monthsToGoal,
+    this.estimatedCompletion,
+    this.status = 'on_track',
+    this.monthlySpent = 0,
+    this.remainingBudget = 0,
+    this.alertMessage,
+  });
+
+  final String incomeFrequency;
+  final double recommendedContribution;
+  final double monthlyContribution;
+  final int? monthsToGoal;
+  final DateTime? estimatedCompletion;
+  final bool feasible;
+  final bool requiresIncomeSetup;
+  final String message;
+  final String status;
+  final double monthlySpent;
+  final double remainingBudget;
+  final String? alertMessage;
+
+  String get periodLabel => incomeFrequency == 'biweekly' ? 'quincena' : 'mes';
+  bool get isAtRisk => status == 'at_risk';
+  bool get isOffTrack => status == 'off_track';
+
+  @override
+  List<Object?> get props => [
+        incomeFrequency,
+        recommendedContribution,
+        monthlyContribution,
+        monthsToGoal,
+        estimatedCompletion,
+        feasible,
+        requiresIncomeSetup,
+        message,
+        status,
+        monthlySpent,
+        remainingBudget,
+        alertMessage,
+      ];
+}
+
 class Goal extends Equatable {
   const Goal({
     required this.id,
@@ -16,6 +66,7 @@ class Goal extends Equatable {
     required this.color,
     this.deadline,
     this.createdAt,
+    this.plan,
   });
 
   final String id;
@@ -39,6 +90,9 @@ class Goal extends Equatable {
 
   final DateTime? createdAt;
 
+  /// Plan calculado por el backend con ingreso, gastos y fecha límite.
+  final GoalActionPlan? plan;
+
   /// Progreso entre 0.0 y 1.0.
   double get progress =>
       targetAmount > 0 ? (savedAmount / targetAmount).clamp(0.0, 1.0) : 0;
@@ -54,6 +108,7 @@ class Goal extends Equatable {
     String? icon,
     String? color,
     DateTime? deadline,
+    GoalActionPlan? plan,
   }) =>
       Goal(
         id: id,
@@ -65,6 +120,7 @@ class Goal extends Equatable {
         color: color ?? this.color,
         deadline: deadline ?? this.deadline,
         createdAt: createdAt,
+        plan: plan ?? this.plan,
       );
 
   @override
@@ -78,5 +134,6 @@ class Goal extends Equatable {
         color,
         deadline,
         createdAt,
+        plan,
       ];
 }

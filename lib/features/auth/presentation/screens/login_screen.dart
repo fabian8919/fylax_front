@@ -36,7 +36,8 @@ class LoginScreen extends ConsumerWidget {
       if (next is AuthAuthenticated) {
         // Login recién hecho → onboarding; sesión restaurada → directo
         // al dashboard (no repetir onboarding en cada arranque).
-        context.go(next.isNewSignIn ? AppRouter.onboarding : AppRouter.dashboard);
+        context
+            .go(next.isNewSignIn ? AppRouter.onboarding : AppRouter.dashboard);
       }
       if (next is AuthError) {
         ScaffoldMessenger.of(context).showSnackBar(

@@ -133,84 +133,92 @@ class GoalCard extends ConsumerWidget {
           border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
         ),
         padding: const EdgeInsets.all(18),
-        child: Row(
+        child: Column(
           children: [
-            _ProgressRing(goal: goal, color: color),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+            Row(
+              children: [
+                _ProgressRing(goal: goal, color: color),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        child: Text(
-                          goal.name,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.titleMedium,
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              goal.name,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: theme.textTheme.titleMedium,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: () => _confirmDelete(context, ref),
+                            child: const Icon(
+                              Icons.delete_outline_rounded,
+                              size: 18,
+                              color: AppColors.textMuted,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      AnimatedMoney(
+                        amount: goal.savedAmount,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: color,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () => _confirmDelete(context, ref),
-                        child: const Icon(
-                          Icons.delete_outline_rounded,
-                          size: 18,
+                      Text(
+                        'de ${Formatters.currency(goal.targetAmount)}'
+                        '${goal.deadline != null ? ' · para ${Formatters.date(goal.deadline!)}' : ''}',
+                        style: theme.textTheme.bodySmall?.copyWith(
                           color: AppColors.textMuted,
                         ),
                       ),
+                      const SizedBox(height: 10),
+                      if (goal.isCompleted)
+                        const _CompletedBadge()
+                      else
+                        GestureDetector(
+                          onTap: () => _showContributionSheet(context, ref),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 7,
+                            ),
+                            decoration: BoxDecoration(
+                              color: color.withValues(alpha: 0.14),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.add_rounded, size: 15, color: color),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Agregar aporte',
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: color,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
                     ],
                   ),
-                  const SizedBox(height: 4),
-                  AnimatedMoney(
-                    amount: goal.savedAmount,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: color,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  Text(
-                    'de ${Formatters.currency(goal.targetAmount)}'
-                    '${goal.deadline != null ? ' · para ${Formatters.date(goal.deadline!)}' : ''}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  if (goal.isCompleted)
-                    const _CompletedBadge()
-                  else
-                    GestureDetector(
-                      onTap: () => _showContributionSheet(context, ref),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 7,
-                        ),
-                        decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.14),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.add_rounded, size: 15, color: color),
-                            const SizedBox(width: 4),
-                            Text(
-                              'Agregar aporte',
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w600,
-                                color: color,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                ],
-              ),
+                ),
+              ],
             ),
+            if (goal.plan != null && !goal.isCompleted) ...[
+              const SizedBox(height: 16),
+              _GoalActionPlanCard(goal: goal),
+            ],
           ],
         ),
       ),
@@ -223,7 +231,8 @@ class GoalCard extends ConsumerWidget {
       builder: (context) => AlertDialog(
         backgroundColor: AppColors.surfaceHigh,
         title: const Text('Eliminar propósito'),
-        content: Text('¿Eliminar "${goal.name}"? Esta acción no se puede deshacer.'),
+        content:
+            Text('¿Eliminar "${goal.name}"? Esta acción no se puede deshacer.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -245,7 +254,10 @@ class GoalCard extends ConsumerWidget {
   }
 
   void _showContributionSheet(BuildContext context, WidgetRef ref) {
-    final controller = TextEditingController();
+    final suggested = goal.plan?.recommendedContribution ?? 0;
+    final controller = TextEditingController(
+      text: suggested > 0 ? suggested.toStringAsFixed(0) : '',
+    );
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -303,6 +315,103 @@ class GoalCard extends ConsumerWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _GoalActionPlanCard extends StatelessWidget {
+  const _GoalActionPlanCard({required this.goal});
+
+  final Goal goal;
+
+  @override
+  Widget build(BuildContext context) {
+    final plan = goal.plan!;
+    final accent = plan.isOffTrack
+        ? AppColors.error
+        : plan.isAtRisk
+            ? const Color(0xFFFFC857)
+            : plan.feasible
+                ? AppColors.blue
+                : AppColors.error;
+    final title = plan.isOffTrack
+        ? 'Tu plan se está desviando'
+        : plan.isAtRisk
+            ? 'Tu plan está en riesgo'
+            : 'Tu plan de acción';
+    final time = plan.monthsToGoal == null
+        ? null
+        : plan.monthsToGoal == 1
+            ? 'en aproximadamente 1 mes'
+            : 'en aproximadamente ${plan.monthsToGoal} meses';
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceHigh,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: accent.withValues(alpha: 0.35)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                plan.isAtRisk || plan.isOffTrack
+                    ? Icons.warning_amber_rounded
+                    : Icons.route_rounded,
+                size: 18,
+                color: accent,
+              ),
+              const SizedBox(width: 7),
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
+            ],
+          ),
+          if (plan.recommendedContribution > 0) ...[
+            const SizedBox(height: 10),
+            RichText(
+              text: TextSpan(
+                style: Theme.of(context).textTheme.bodyMedium,
+                children: [
+                  TextSpan(
+                    text: Formatters.currency(plan.recommendedContribution),
+                    style: TextStyle(
+                      color: accent,
+                      fontSize: 19,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  TextSpan(text: ' cada ${plan.periodLabel}'),
+                  if (time != null) TextSpan(text: ' · $time'),
+                ],
+              ),
+            ),
+          ],
+          const SizedBox(height: 8),
+          Text(
+            plan.alertMessage ?? plan.message,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+          ),
+          if (plan.requiresIncomeSetup) ...[
+            const SizedBox(height: 10),
+            FilledButton.tonalIcon(
+              onPressed: () => context.push(AppRouter.financialSetup),
+              icon: const Icon(Icons.payments_rounded, size: 18),
+              label: const Text('Configurar mis ingresos'),
+            ),
+          ],
+        ],
       ),
     );
   }

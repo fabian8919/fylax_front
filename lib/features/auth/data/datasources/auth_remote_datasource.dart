@@ -16,6 +16,12 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 abstract class AuthRemoteDataSource {
   Future<UserModel> signInWithGoogle();
   Future<UserModel> syncSessionWithBackend();
+  Future<UserModel> getCurrentUser();
+  Future<UserModel> updateFinancialProfile({
+    required double incomeAmount,
+    required String incomeFrequency,
+    required double monthlyBudget,
+  });
   Future<void> signOut();
 }
 
@@ -60,6 +66,29 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       data: {
         if (googleRefreshToken != null)
           'google_refresh_token': googleRefreshToken,
+      },
+    );
+    return UserModel.fromJson(response.data!);
+  }
+
+  @override
+  Future<UserModel> getCurrentUser() async {
+    final response = await _client.get<Map<String, dynamic>>('/users/me');
+    return UserModel.fromJson(response.data!);
+  }
+
+  @override
+  Future<UserModel> updateFinancialProfile({
+    required double incomeAmount,
+    required String incomeFrequency,
+    required double monthlyBudget,
+  }) async {
+    final response = await _client.patch<Map<String, dynamic>>(
+      '/users/me',
+      data: {
+        'income_amount': incomeAmount,
+        'income_frequency': incomeFrequency,
+        'monthly_budget': monthlyBudget,
       },
     );
     return UserModel.fromJson(response.data!);

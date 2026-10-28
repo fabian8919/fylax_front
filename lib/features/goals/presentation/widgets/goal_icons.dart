@@ -17,8 +17,7 @@ const goalIconCatalog = <String, IconData>{
   'gift': Icons.card_giftcard_rounded,
 };
 
-IconData goalIcon(String icon) =>
-    goalIconCatalog[icon] ?? Icons.flag_rounded;
+IconData goalIcon(String icon) => goalIconCatalog[icon] ?? Icons.flag_rounded;
 
 /// Colores sugeridos para propósitos (paleta de la marca).
 const goalColorPalette = <String>[

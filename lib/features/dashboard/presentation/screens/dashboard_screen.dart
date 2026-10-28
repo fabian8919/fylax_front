@@ -1,6 +1,8 @@
 import 'package:fylax_front/app/router.dart';
 import 'package:fylax_front/app/theme/app_theme.dart';
 import 'package:fylax_front/core/widgets/fade_in_slide.dart';
+import 'package:fylax_front/features/alerts/presentation/providers/alerts_provider.dart';
+import 'package:fylax_front/features/alerts/presentation/widgets/plan_alert_card.dart';
 import 'package:fylax_front/features/auth/presentation/providers/auth_provider.dart';
 import 'package:fylax_front/features/dashboard/presentation/providers/dashboard_provider.dart';
 import 'package:fylax_front/features/dashboard/presentation/widgets/balance_card.dart';
@@ -28,9 +30,23 @@ class DashboardScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final summaryAsync = ref.watch(dashboardSummaryProvider);
     final authState = ref.watch(authNotifierProvider);
+    final alerts = ref.watch(alertsProvider).valueOrNull ?? const [];
+    ref.listen(syncStatusProvider, (previous, next) {
+      final lastSync = next.valueOrNull?.lastSyncAt;
+      if (lastSync != null && lastSync != previous?.valueOrNull?.lastSyncAt) {
+        ref.invalidate(dashboardSummaryProvider);
+        ref.invalidate(goalsProvider);
+        ref.invalidate(alertsProvider);
+        ref.invalidate(transactionsProvider);
+      }
+    });
     final firstName = switch (authState) {
       AuthAuthenticated(:final user) => user.name.split(' ').first,
       _ => null,
+    };
+    final hasFinancialSetup = switch (authState) {
+      AuthAuthenticated(:final user) => user.hasFinancialSetup,
+      _ => false,
     };
 
     return Scaffold(
@@ -40,6 +56,9 @@ class DashboardScreen extends ConsumerWidget {
         onRefresh: () async {
           ref.invalidate(dashboardSummaryProvider);
           ref.invalidate(syncStatusProvider);
+          ref.invalidate(goalsProvider);
+          ref.invalidate(alertsProvider);
+          ref.invalidate(transactionsProvider);
         },
         child: summaryAsync.when(
           loading: () => const Center(
@@ -58,6 +77,25 @@ class DashboardScreen extends ConsumerWidget {
               FadeInSlide(
                 child: _Header(firstName: firstName),
               ),
+              if (!hasFinancialSetup) ...[
+                const SizedBox(height: 16),
+                const FadeInSlide(
+                  delay: Duration(milliseconds: 80),
+                  child: _FinancialSetupBanner(),
+                ),
+              ],
+              if (alerts.isNotEmpty) ...[
+                const SizedBox(height: 16),
+                FadeInSlide(
+                  delay: const Duration(milliseconds: 60),
+                  child: PlanAlertCard(
+                    alert: alerts.first,
+                    onDismiss: () => ref
+                        .read(alertsProvider.notifier)
+                        .markAsRead(alerts.first.id),
+                  ),
+                ),
+              ],
               const SizedBox(height: 20),
               FadeInSlide(
                 delay: const Duration(milliseconds: 100),
@@ -84,7 +122,8 @@ class DashboardScreen extends ConsumerWidget {
               const SizedBox(height: 14),
               FadeInSlide(
                 delay: const Duration(milliseconds: 280),
-                child: CategoryDistribution(spending: summary.spendingByCategory),
+                child:
+                    CategoryDistribution(spending: summary.spendingByCategory),
               ),
               const SizedBox(height: 28),
               FadeInSlide(
@@ -97,6 +136,62 @@ class DashboardScreen extends ConsumerWidget {
               const FadeInSlide(
                 delay: Duration(milliseconds: 420),
                 child: _RecentTransactions(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FinancialSetupBanner extends StatelessWidget {
+  const _FinancialSetupBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.surfaceHigh,
+      borderRadius: BorderRadius.circular(18),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: () => context.push(AppRouter.financialSetup),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 42,
+                height: 42,
+                decoration: BoxDecoration(
+                  gradient: AppColors.brandGradientSoft,
+                  borderRadius: BorderRadius.circular(13),
+                ),
+                child: const Icon(
+                  Icons.payments_rounded,
+                  color: AppColors.green,
+                ),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Personaliza tu plan financiero',
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Cuéntanos si tu ingreso es mensual o quincenal.',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: AppColors.textMuted,
               ),
             ],
           ),
@@ -198,8 +293,7 @@ class _PurposeCard extends ConsumerWidget {
                         tween: Tween(begin: 0, end: goal.progress),
                         duration: const Duration(milliseconds: 1100),
                         curve: Curves.easeOutCubic,
-                        builder: (context, value, _) =>
-                            LinearProgressIndicator(
+                        builder: (context, value, _) => LinearProgressIndicator(
                           value: value,
                           minHeight: 6,
                           color: color,

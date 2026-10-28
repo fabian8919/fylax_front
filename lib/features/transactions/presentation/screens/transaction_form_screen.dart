@@ -2,9 +2,11 @@ import 'package:fylax_front/app/theme/app_theme.dart';
 import 'package:fylax_front/core/utils/category_icons.dart';
 import 'package:fylax_front/core/utils/formatters.dart';
 import 'package:fylax_front/core/widgets/fade_in_slide.dart';
+import 'package:fylax_front/features/alerts/presentation/providers/alerts_provider.dart';
 import 'package:fylax_front/features/categories/domain/entities/category.dart';
 import 'package:fylax_front/features/categories/presentation/providers/categories_provider.dart';
 import 'package:fylax_front/features/dashboard/presentation/providers/dashboard_provider.dart';
+import 'package:fylax_front/features/goals/presentation/providers/goals_provider.dart';
 import 'package:fylax_front/features/transactions/domain/entities/transaction.dart';
 import 'package:fylax_front/features/transactions/presentation/providers/transactions_provider.dart';
 import 'package:flutter/material.dart';
@@ -30,8 +32,7 @@ class TransactionFormScreen extends ConsumerStatefulWidget {
       _TransactionFormScreenState();
 }
 
-class _TransactionFormScreenState
-    extends ConsumerState<TransactionFormScreen> {
+class _TransactionFormScreenState extends ConsumerState<TransactionFormScreen> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _merchant;
   late final TextEditingController _amount;
@@ -84,10 +85,9 @@ class _TransactionFormScreenState
                   labelText: 'Monto',
                   hintText: '0',
                   prefixText: '\$ ',
-                  prefixStyle:
-                      Theme.of(context).textTheme.titleLarge?.copyWith(
-                            color: AppColors.textMuted,
-                          ),
+                  prefixStyle: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: AppColors.textMuted,
+                      ),
                 ),
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -215,6 +215,8 @@ class _TransactionFormScreenState
       (_) {
         ref.invalidate(transactionsProvider);
         ref.invalidate(dashboardSummaryProvider);
+        ref.invalidate(goalsProvider);
+        ref.invalidate(alertsProvider);
         context.pop();
       },
     );
@@ -277,14 +279,11 @@ class _CategoryChip extends StatelessWidget {
         curve: Curves.easeOutCubic,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: selected
-              ? color.withValues(alpha: 0.18)
-              : AppColors.surfaceHigh,
+          color:
+              selected ? color.withValues(alpha: 0.18) : AppColors.surfaceHigh,
           borderRadius: BorderRadius.circular(14),
           border: Border.all(
-            color: selected
-                ? color
-                : Colors.white.withValues(alpha: 0.06),
+            color: selected ? color : Colors.white.withValues(alpha: 0.06),
             width: selected ? 1.4 : 1,
           ),
         ),

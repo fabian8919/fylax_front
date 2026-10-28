@@ -99,8 +99,7 @@ class _GoalFormScreenState extends ConsumerState<GoalFormScreen> {
                 onPick: () async {
                   final picked = await showDatePicker(
                     context: context,
-                    initialDate:
-                        DateTime.now().add(const Duration(days: 180)),
+                    initialDate: DateTime.now().add(const Duration(days: 180)),
                     firstDate: DateTime.now(),
                     lastDate: DateTime.now().add(const Duration(days: 3650)),
                   );
@@ -209,9 +208,7 @@ class _IconPicker extends StatelessWidget {
               ),
               child: Icon(
                 entry.value,
-                color: entry.key == selected
-                    ? color
-                    : AppColors.textSecondary,
+                color: entry.key == selected ? color : AppColors.textSecondary,
                 size: 24,
               ),
             ),
@@ -243,9 +240,7 @@ class _ColorPicker extends StatelessWidget {
                 shape: BoxShape.circle,
                 color: goalColor(hex),
                 border: Border.all(
-                  color: hex == selected
-                      ? Colors.white
-                      : Colors.transparent,
+                  color: hex == selected ? Colors.white : Colors.transparent,
                   width: 2.4,
                 ),
                 boxShadow: hex == selected

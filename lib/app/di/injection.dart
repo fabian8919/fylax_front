@@ -2,6 +2,9 @@ import 'package:fylax_front/core/constants/app_constants.dart';
 import 'package:fylax_front/core/demo/demo_goals_repository.dart';
 import 'package:fylax_front/core/demo/demo_repositories.dart';
 import 'package:fylax_front/core/network/api_client.dart';
+import 'package:fylax_front/features/alerts/data/datasources/alerts_remote_datasource.dart';
+import 'package:fylax_front/features/alerts/data/repositories/alerts_repository_impl.dart';
+import 'package:fylax_front/features/alerts/domain/repositories/alerts_repository.dart';
 import 'package:fylax_front/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:fylax_front/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:fylax_front/features/auth/domain/repositories/auth_repository.dart';
@@ -65,6 +68,9 @@ void _registerBackend() {
   sl.registerLazySingleton<GoalsRemoteDataSource>(
     () => GoalsRemoteDataSourceImpl(sl<ApiClient>()),
   );
+  sl.registerLazySingleton<AlertsRemoteDataSource>(
+    () => AlertsRemoteDataSourceImpl(sl<ApiClient>()),
+  );
 
   // Repositorios
   sl.registerLazySingleton<AuthRepository>(
@@ -85,6 +91,9 @@ void _registerBackend() {
   sl.registerLazySingleton<GoalsRepository>(
     () => GoalsRepositoryImpl(sl<GoalsRemoteDataSource>()),
   );
+  sl.registerLazySingleton<AlertsRepository>(
+    () => AlertsRepositoryImpl(sl<AlertsRemoteDataSource>()),
+  );
 }
 
 void _registerDemo() {
@@ -103,4 +112,5 @@ void _registerDemo() {
   );
   sl.registerLazySingleton<SyncRepository>(DemoSyncRepository.new);
   sl.registerLazySingleton<GoalsRepository>(DemoGoalsRepository.new);
+  sl.registerLazySingleton<AlertsRepository>(DemoAlertsRepository.new);
 }

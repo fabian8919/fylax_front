@@ -179,6 +179,24 @@ class DemoAuthRepository implements AuthRepository {
       const Right(null); // siempre arranca en login (demo)
 
   @override
+  Future<Either<Failure, User>> updateFinancialProfile({
+    required double incomeAmount,
+    required String incomeFrequency,
+    required double monthlyBudget,
+  }) async {
+    final monthlyIncome =
+        incomeAmount * (incomeFrequency == 'biweekly' ? 2 : 1);
+    return Right(
+      _demoUser.copyWith(
+        incomeAmount: incomeAmount,
+        incomeFrequency: incomeFrequency,
+        monthlyIncome: monthlyIncome,
+        monthlyBudget: monthlyBudget,
+      ),
+    );
+  }
+
+  @override
   Future<bool> hasGmailReadonlyScope() async => true;
 }
 
@@ -221,8 +239,9 @@ class DemoTransactionsRepository implements TransactionsRepository {
 
     final start = (page - 1) * pageSize;
     if (start >= filtered.length) return const Right([]);
-    final end =
-        (start + pageSize) > filtered.length ? filtered.length : start + pageSize;
+    final end = (start + pageSize) > filtered.length
+        ? filtered.length
+        : start + pageSize;
     return Right(filtered.sublist(start, end));
   }
 

@@ -60,22 +60,49 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, User?>> getCurrentUser() async {
-    // Sesión persistida por supabase_flutter (SharedPreferences/Keystore):
-    // si hay sesión vigente, se mapea a la entidad de dominio.
+    // Sesión persistida por supabase_flutter (SharedPreferences/Keystore).
+    // Se consulta /users/me para recuperar también ingreso y presupuesto.
     final session = _supabase?.auth.currentSession;
     if (session == null) return const Right(null);
 
-    final u = session.user;
-    final metadata = u.userMetadata ?? const <String, dynamic>{};
-    return Right(
-      User(
-        id: u.id,
-        email: u.email ?? '',
-        name: (metadata['full_name'] ?? metadata['name'] ?? '') as String,
-        subscriptionTier: 'free',
-        avatarUrl: metadata['avatar_url'] as String?,
-      ),
-    );
+    try {
+      final model = await _remote.getCurrentUser();
+      return Right(model.toEntity());
+    } catch (_) {
+      // Si el backend no está disponible, la identidad local permite entrar;
+      // la configuración financiera se recargará al volver la conexión.
+      final u = session.user;
+      final metadata = u.userMetadata ?? const <String, dynamic>{};
+      return Right(
+        User(
+          id: u.id,
+          email: u.email ?? '',
+          name: (metadata['full_name'] ?? metadata['name'] ?? '') as String,
+          subscriptionTier: 'free',
+          avatarUrl: metadata['avatar_url'] as String?,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<Either<Failure, User>> updateFinancialProfile({
+    required double incomeAmount,
+    required String incomeFrequency,
+    required double monthlyBudget,
+  }) async {
+    try {
+      final model = await _remote.updateFinancialProfile(
+        incomeAmount: incomeAmount,
+        incomeFrequency: incomeFrequency,
+        monthlyBudget: monthlyBudget,
+      );
+      return Right(model.toEntity());
+    } on DioException catch (e) {
+      return Left(_mapError(e));
+    } catch (_) {
+      return const Left(ServerFailure());
+    }
   }
 
   @override

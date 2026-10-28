@@ -20,6 +20,13 @@ abstract class AuthRepository {
   /// Útil para rutas protegidas y restablecimiento de sesión al arrancar.
   Future<Either<Failure, User?>> getCurrentUser();
 
+  /// Guarda ingreso por nómina, frecuencia y presupuesto mensual.
+  Future<Either<Failure, User>> updateFinancialProfile({
+    required double incomeAmount,
+    required String incomeFrequency,
+    required double monthlyBudget,
+  });
+
   /// Verdadero si el consent screen otorgó el scope gmail.readonly.
   Future<bool> hasGmailReadonlyScope();
 }
