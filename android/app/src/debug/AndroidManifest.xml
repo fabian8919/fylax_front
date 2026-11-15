@@ -4,4 +4,9 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Solo DEBUG: permite HTTP en claro hacia el backend local de la LAN
+         (uvicorn en 0.0.0.0, ej. http://192.168.x.x:8000 desde el
+         teléfono físico o http://10.0.2.2:8000 desde el emulador) para
+         probar el login. En release el tráfico sigue siendo HTTPS-only. -->
+    <application android:usesCleartextTraffic="true" />
 </manifest>
