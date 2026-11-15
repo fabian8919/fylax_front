@@ -2,9 +2,17 @@
 
 import 'package:fylax_front/app/app.dart';
 import 'package:fylax_front/app/di/injection.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() async {
+    // Misma secuencia que main.dart: primero el .env, luego la DI.
+    await dotenv.load();
+  });
+
   testWidgets('La app arranca en la pantalla de login', (tester) async {
     await configureDependencies();
     await tester.pumpWidget(const FylaxApp());
