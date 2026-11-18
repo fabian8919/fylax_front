@@ -51,3 +51,16 @@ SUPABASE_ANON_KEY=<anon public key del proyecto>
 - Enviarse/recibir una alerta real de Bancolombia, Amazon o Avianca → la
   transacción debe aparecer sola en el dashboard. Los correos de Nequi
   aún no generan transacción (falta JEV o un parser de `nequi.com.co`).
+
+## Fase 6 — Cuando el back se despliegue a Cloud Run
+
+El plan completo está en `fylax_back/docs/PENDIENTES_SETUP.md`. Lo que
+cambia en el front:
+
+- `API_BASE_URL` pasará a la URL HTTPS permanente de Cloud Run (adiós a
+  la IP-LAN del PC, que el router puede reasignar por DHCP — ya pasó una
+  vez: 192.168.1.12 → 192.168.1.15 — y adiós al túnel efímero).
+- Con HTTPS real, el `usesCleartextTraffic` de debug deja de ser
+  necesario para el back (queda solo para desarrollo local).
+- Recompilar el APK / hacer `flutter run` completo tras el cambio (el
+  `.env` se empaqueta al compilar).
