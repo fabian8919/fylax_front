@@ -1,5 +1,6 @@
 import 'package:fylax_front/app/theme/app_theme.dart';
 import 'package:fylax_front/core/widgets/fade_in_slide.dart';
+import 'package:fylax_front/features/sync/presentation/providers/realtime_provider.dart';
 import 'package:fylax_front/features/transactions/domain/entities/transaction.dart';
 import 'package:fylax_front/features/transactions/presentation/providers/transactions_provider.dart';
 import 'package:fylax_front/features/transactions/presentation/widgets/transaction_card.dart';
@@ -36,6 +37,8 @@ class _TransactionsFeedScreenState
 
   @override
   Widget build(BuildContext context) {
+    // Mantiene vivo el canal Realtime también en esta pestaña.
+    ref.watch(transactionsRealtimeProvider);
     final asyncTx = ref.watch(transactionsProvider);
 
     return Scaffold(

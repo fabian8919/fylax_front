@@ -10,6 +10,7 @@ import 'package:fylax_front/features/dashboard/presentation/widgets/category_dis
 import 'package:fylax_front/features/goals/presentation/providers/goals_provider.dart';
 import 'package:fylax_front/features/goals/presentation/widgets/goal_icons.dart';
 import 'package:fylax_front/core/utils/formatters.dart';
+import 'package:fylax_front/features/sync/presentation/providers/realtime_provider.dart';
 import 'package:fylax_front/features/sync/presentation/providers/sync_provider.dart';
 import 'package:fylax_front/features/sync/presentation/widgets/sync_status_indicator.dart';
 import 'package:fylax_front/features/transactions/presentation/providers/transactions_provider.dart';
@@ -28,6 +29,9 @@ class DashboardScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Activa el canal Realtime: los INSERTs en transactions refrescan
+    // dashboard/movimientos/propósitos/alertas sin pull-to-refresh.
+    ref.watch(transactionsRealtimeProvider);
     final summaryAsync = ref.watch(dashboardSummaryProvider);
     final authState = ref.watch(authNotifierProvider);
     final alerts = ref.watch(alertsProvider).valueOrNull ?? const [];
